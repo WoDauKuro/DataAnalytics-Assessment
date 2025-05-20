@@ -77,7 +77,7 @@ This repository contains SQL solutions to four business problems focused on cust
 ## Challenges Faced & Solutions
 
 1. **Database Compatibility Issues**
-   - **Issues**: I initially attempted to load the database using PostgreSQL but encountered execution errors in PostgreSQL.
+   - **Issue**: I initially attempted to load the database using PostgreSQL but encountered execution errors in PostgreSQL.
    - **Solution**: To save time and avoid modifications, I switched to using MySQL Workbench, which aligned with the original SQL syntax and allowed me to load and query the database without issues.
 
 2. **NULL Values in Customer Names (Q1/Q4)**  
