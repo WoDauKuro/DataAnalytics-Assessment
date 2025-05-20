@@ -6,10 +6,11 @@ This repository contains SQL solutions to four business problems focused on cust
 ---
 
 ## Repository Structure
-- `Assessment_Q1.sql`: High-value customers with multiple products.
-- `Assessment_Q2.sql`: Transaction frequency segmentation.
-- `Assessment_Q3.sql`: Inactive account alerts.
-- `Assessment_Q4.sql`: Customer lifetime value estimation.
+
+* [`Assessment_Q1.sql`](Assessment_Q1.sql): High-value customers with multiple products
+* [`Assessment_Q2.sql`](Assessment_Q2.sql): Transaction frequency segmentation.
+* [`Assessment_Q3.sql`](Assessment_Q3.sql): Inactive account alerts.
+* [`Assessment_Q4.sql`](Assessment_Q4.sql): Customer lifetime value estimation.
 
 ---
 
@@ -48,8 +49,7 @@ This repository contains SQL solutions to four business problems focused on cust
 **Approach**:  
 - Combined savings (`is_regular_savings = 1`) and investment (`is_a_fund = 1`) plans.  
 - Used `LEFT JOIN` to include accounts with no transactions.  
-- Calculated `inactivity_days` with `DATEDIFF(CURDATE(), MAX(transaction_date))`.  
-**Key Logic**:  
+- Calculated `inactivity_days` with `DATEDIFF(CURDATE(), MAX(transaction_date))`.
 - Filtered active accounts via `is_deleted = 0` and `is_archived = 0`.  
 - `HAVING` clause flagged accounts with `last_transaction_date IS NULL OR inactivity_days > 365`.
 
@@ -65,35 +65,43 @@ This repository contains SQL solutions to four business problems focused on cust
 
 **Approach**:  
 - Concatenated `first_name` and `last_name` to resolve `NULL` values in `users.name`.  
-- Calculated tenure in months with `TIMESTAMPDIFF(MONTH, date_jointed, CURDATE())`.  
-- Derived CLV:  
-  - Converted `confirmed_amount` (kobo) to Naira: `SUM(confirmed_amount * 0.00001)`.  
-  - Applied formula: `(total_profit / tenure_months) * 12`, with `NULLIF` to handle division by zero.  
-**Edge Cases**:  
-- Used `COALESCE(COUNT(savings.id), 0)` to default to 0 transactions.  
+- Calculated tenure in months with `TIMESTAMPDIFF(MONTH, date_joined, CURDATE())`.  
+- Converted `confirmed_amount` (kobo) to Naira using `SUM(confirmed_amount * 0.00001)`.
+- Applied estimated CLV formula: `(total_profit / tenure_months) * 12`, with `NULLIF` to handle division by zero. 
+
+**Edge Case**:  
+- Used `COALESCE(COUNT(savings.id), 0)` to ensure transaction counts default to zero if none exist.  
 
 ---
 
 ## Challenges Faced & Solutions
 
-1. **NULL Values in Customer Names (Q1/Q4)**  
-   - **Issue**: The `users.name` column had only `NULL` values.
-   - **Solution**: Used `CONCAT(first_name, ' ', last_name)` to construct full names. However, I observed that there were customers with `NULL` values in their `first_name` and `last_name`.
+1. **Database Compatibility Issues**
+   - **Issues**: I initially attempted to load the database using PostgreSQL but encountered execution errors in PostgreSQL.
+   - **Solution**: To save time and avoid modifications, I switched to using MySQL Workbench, which aligned with the original SQL syntax and allowed me to load and query the database without issues.
 
-2. **Query inefficiency (Q1/Q2)**  
+2. **NULL Values in Customer Names (Q1/Q4)**  
+   - **Issue**: The `users.name` column had only `NULL` values.
+   - **Solution**: Used `CONCAT(first_name, ' ', last_name)` to construct full names.
+
+3. **Query inefficiency (Q1/Q2)**  
    - **Issue**: Initial joins across large tables had an extended execution time.  
    - **Solution**: Optimized with CTEs and `DISTINCT` to reduce dataset size early.  
 
-3. **Date Handling in Q3**  
+4. **Date Handling in Q3**  
    - **Issue**: `transaction_date` included time, which did not align with the expected result.  
    - **Solution**: Used `CAST(transaction_date AS DATE)` to strip time.  
 
-4. **Currency Conversion (Q1/Q4)**  
+5. **Currency Conversion (Q1/Q4)**  
    - **Issue**: Amounts stored in kobo required conversion to Naira.  
-   - **Solution**: Multiplied by `0.01` (Q1) and `0.00001` (Q4) for accurate calculations.
+   - **Solution**: Multiplied by `0.01` in Q1 and `0.00001` in Q4, based on the data context and formula requirements.
 
-5. **Transaction Volume vs. Value in CLV Calculation (Q4)**
+6. **Transaction Volume vs. Value in CLV Calculation (Q4)**
    - **Issue**: Initial confusion between SUM(confirmed_amount) (transaction value) and COUNT(id) (transaction volume).
    - **Solution**: 
-     - Read the question severally to understand the problem statement and critically examined the expected result.
+     - Revisited the question multiple times to understand the problem statement and critically examined the expected result.
      - Used COUNT(id) for transaction volume in results, while keeping SUM(confirmed_amount) for estimated CLV formula.
+
+7. **Identifying Active Accounts (Q3)**
+   - **Issue**: Figuring out active accounts was not straightforward. Initially considered using the status_id column from adashi_staging.plans_plan, but it was unclear whether 1 indicated inactive and 2 active, or vice versa.
+   - **Solution**: Filtered active accounts using is_deleted = 0 and is_archived = 0, which produced more reliable results.
